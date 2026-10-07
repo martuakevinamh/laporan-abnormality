@@ -52,13 +52,13 @@ export default async function HomePage() {
         <Card className="p-4 bg-white border border-border shadow-sm flex flex-col items-center">
           <p className="text-3xl font-bold text-text mb-1">{reported}</p>
           <p className="text-xs text-text-muted font-medium text-center uppercase tracking-wide">
-            Laporan Diterima <br/>(Bulan Ini)
+            Total Laporan <br/>Masuk
           </p>
         </Card>
         <Card className="p-4 bg-white border border-border shadow-sm flex flex-col items-center">
           <p className="text-3xl font-bold text-accent mb-1">{resolved}</p>
           <p className="text-xs text-text-muted font-medium text-center uppercase tracking-wide">
-            Selesai Ditangani <br/>(Bulan Ini)
+            Selesai <br/>Ditangani
           </p>
         </Card>
       </div>
