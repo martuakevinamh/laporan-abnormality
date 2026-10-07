@@ -6,7 +6,7 @@ import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { submitReport } from "./actions/reportActions";
+import { submitReport } from "../actions/reportActions";
 import { Button, Input, Textarea, Select, RadioCards, FileUpload, Card } from "@/components/ui";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
