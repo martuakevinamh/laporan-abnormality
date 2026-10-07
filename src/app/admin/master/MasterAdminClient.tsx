@@ -54,10 +54,11 @@ export default function MasterAdminClient({ initialAdmins }: { initialAdmins: an
                       disabled={loadingId === admin.id}
                       onChange={(e) => handleUpdate(admin.id, e.target.value, admin.is_active)}
                       className="min-w-[120px] text-sm py-1.5"
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super Admin</option>
-                    </Select>
+                      options={[
+                        { value: "admin", label: "Admin" },
+                        { value: "super_admin", label: "Super Admin" },
+                      ]}
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <button
