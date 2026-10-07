@@ -1,273 +1,89 @@
-"use client";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { Button, Card } from "@/components/ui";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+export const metadata = {
+  title: "Beranda - Laporan Abnormality Fasilitas Umum",
+};
 
-import { submitReport } from "./actions/reportActions";
-import { Button, Input, Textarea, Select, RadioCards, FileUpload, Card } from "@/components/ui";
+export default async function HomePage() {
+  const supabase = await createClient();
+  
+  // Ambil data statistik dari RPC (Aman, hanya angka tanpa data spesifik)
+  const { data: stats } = await supabase.rpc("get_public_stats");
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-const departments = [
-  "Press", "Body 1", "Body 2", "Toso 1", "Toso 2", "Assy 1", "Assy 2", 
-  "Log. 1", "Log. 2", "PCD", "GA", "PE", "QI", "QE", "QSS", "R&D", 
-  "CIT", "MTNC PW", "MTNC TA", "EA", "HRD", "EID"
-];
-
-const departmentOptions = departments.map((d) => ({ value: d, label: d }));
-
-const severityOptions = [
-  {
-    value: "Rendah",
-    label: "Rendah",
-    description: "Tidak mengganggu operasional atau keselamatan",
-    colorTone: "green" as const,
-  },
-  {
-    value: "Sedang",
-    label: "Sedang",
-    description: "Perhatian khusus, ada potensi gangguan ringan",
-    colorTone: "yellow" as const,
-  },
-  {
-    value: "Tinggi",
-    label: "Tinggi",
-    description: "Bahaya kritis, butuh penanganan segera",
-    colorTone: "red" as const,
-  },
-];
-
-// ─── Schema Validation (Zod) ─────────────────────────────────────────────────
-const formSchema = z.object({
-  reporterName: z.string().min(1, { message: "Nama lengkap wajib diisi." }),
-  npk: z.string().min(1, { message: "NPK wajib diisi." }),
-  department: z.string().min(1, { message: "Silakan pilih departemen." }),
-  area: z
-    .string()
-    .min(3, { message: "Area temuan minimal 3 karakter." })
-    .max(150, { message: "Area temuan maksimal 150 karakter." }),
-  hazardLevel: z.enum(["Rendah", "Sedang", "Tinggi"], {
-    message: "Pilih tingkat bahaya.",
-  }),
-  description: z
-    .string()
-    .min(20, { message: "Deskripsi minimal 20 karakter." })
-    .max(1000, { message: "Deskripsi maksimal 1000 karakter." }),
-  // In a real app we'd validate the actual File objects via Supabase logic
-  files: z.custom<File[]>().refine((files) => files && files.length > 0, {
-    message: "Minimal unggah 1 foto temuan.",
-  }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-// ─── Page Component ──────────────────────────────────────────────────────────
-export default function BuatLaporanPage() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      reporterName: "",
-      npk: "",
-      department: "",
-      area: "",
-      hazardLevel: undefined,
-      description: "",
-      files: [],
-    },
-  });
-
-  const descriptionValue = useWatch({
-    control,
-    name: "description",
-    defaultValue: "",
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    
-    try {
-      const formData = new FormData();
-      formData.append("reporterName", data.reporterName);
-      formData.append("npk", data.npk);
-      formData.append("department", data.department);
-      formData.append("area", data.area);
-      formData.append("hazardLevel", data.hazardLevel);
-      formData.append("description", data.description);
-      
-      data.files.forEach((file) => {
-        formData.append("files", file);
-      });
-      
-      // Ambil nilai honeypot jika bot mencoba mengisi
-      const honeypot = document.getElementById("botField") as HTMLInputElement;
-      if (honeypot && honeypot.value) {
-        formData.append("botField", honeypot.value);
-      }
-
-      const result = await submitReport(formData);
-
-      if (result.success && result.reportNumber) {
-        router.push(`/laporan/sukses?id=${result.reportNumber}`);
-      } else {
-        setSubmitError(result.error || "Gagal mengirim laporan.");
-        setIsSubmitting(false);
-      }
-    } catch (err) {
-      console.error(err);
-      setSubmitError("Terjadi kesalahan sistem. Silakan coba lagi.");
-      setIsSubmitting(false);
-    }
-  };
+  const reported = stats?.reported_this_month || 0;
+  const resolved = stats?.resolved_this_month || 0;
 
   return (
-    <div className="max-w-160 mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <div className="mb-8 text-center sm:text-left">
-        <h1 className="text-2xl font-bold text-text">Buat Laporan Abnormality</h1>
-        <p className="mt-2 text-sm text-text-muted">
-          Silakan lengkapi form di bawah ini untuk melaporkan temuan abnormality di area fasilitas umum perusahaan.
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] p-4 sm:p-6 w-full max-w-4xl mx-auto text-center">
+      
+      {/* HEADER SECTION */}
+      <div className="max-w-2xl mx-auto space-y-4 mb-8 mt-4">
+        <div className="inline-flex items-center justify-center p-3 bg-blue-50 text-accent rounded-full mb-2">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text tracking-tight leading-tight">
+          Laporan Abnormality <br className="hidden sm:block" /> Fasilitas Umum
+        </h1>
+        <p className="text-base sm:text-lg text-text-muted max-w-xl mx-auto">
+          Laporkan kendala, kerusakan, atau temuan abnormality di area fasilitas perusahaan dengan cepat, transparan, dan mudah dipantau.
         </p>
       </div>
 
-      <Card padding="lg">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          {/* 1. Nama Lengkap */}
-          <Input
-            label="Nama Lengkap"
-            placeholder="Masukkan nama lengkap Anda..."
-            {...register("reporterName")}
-            error={errors.reporterName?.message}
-          />
+      {/* CALL TO ACTION */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto mb-12">
+        <Link href="/lapor" className="w-full sm:w-auto">
+          <Button variant="primary" className="w-full sm:w-auto text-base px-8 py-3">
+            Buat Laporan
+          </Button>
+        </Link>
+        <Link href="/cek-status" className="w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto text-base px-8 py-3">
+            Cek Status
+          </Button>
+        </Link>
+      </div>
 
-          {/* 2. NPK */}
-          <Input
-            label="NPK (Nomor Pokok Karyawan)"
-            placeholder="Contoh: 12345"
-            {...register("npk")}
-            error={errors.npk?.message}
-          />
+      {/* STATISTIK RINGKAS */}
+      <div className="grid grid-cols-2 gap-4 w-full max-w-md mx-auto mb-12">
+        <Card className="p-4 bg-white border border-border shadow-sm flex flex-col items-center">
+          <p className="text-3xl font-bold text-text mb-1">{reported}</p>
+          <p className="text-xs text-text-muted font-medium text-center uppercase tracking-wide">
+            Laporan Diterima <br/>(Bulan Ini)
+          </p>
+        </Card>
+        <Card className="p-4 bg-white border border-border shadow-sm flex flex-col items-center">
+          <p className="text-3xl font-bold text-accent mb-1">{resolved}</p>
+          <p className="text-xs text-text-muted font-medium text-center uppercase tracking-wide">
+            Selesai Ditangani <br/>(Bulan Ini)
+          </p>
+        </Card>
+      </div>
 
-          {/* 3. Departemen */}
-          <Controller
-            name="department"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Departemen"
-                placeholder="Pilih departemen asal Anda..."
-                options={departmentOptions}
-                error={errors.department?.message}
-                {...field}
-              />
-            )}
-          />
+      {/* LANGKAH SINGKAT */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full text-left">
+        <Card padding="md" className="bg-white hover:border-accent/30 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-blue-50 text-accent flex items-center justify-center font-bold mb-3">1</div>
+          <h3 className="font-semibold text-text mb-1">Isi Laporan</h3>
+          <p className="text-sm text-text-muted">Foto temuan, pilih lokasi, dan kirimkan detail singkat.</p>
+        </Card>
+        
+        <Card padding="md" className="bg-white hover:border-accent/30 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center font-bold mb-3">2</div>
+          <h3 className="font-semibold text-text mb-1">Tim Meninjau</h3>
+          <p className="text-sm text-text-muted">Tim terkait akan meninjau dan memulai perbaikan fasilitas.</p>
+        </Card>
+        
+        <Card padding="md" className="bg-white hover:border-accent/30 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center font-bold mb-3">3</div>
+          <h3 className="font-semibold text-text mb-1">Ditindaklanjuti</h3>
+          <p className="text-sm text-text-muted">Abnormality selesai diperbaiki beserta foto sesudah penanganan.</p>
+        </Card>
+      </div>
 
-          {/* 4. Area Temuan */}
-          <Input
-            label="Area Temuan"
-            placeholder="Contoh: Toilet Gedung A Lt. 2, Area Parkir Motor Timur..."
-            {...register("area")}
-            error={errors.area?.message}
-          />
-
-          {/* 5. Tingkat Bahaya */}
-          <Controller
-            name="hazardLevel"
-            control={control}
-            render={({ field }) => (
-              <RadioCards
-                label="Tingkat Bahaya"
-                name="hazardLevel"
-                options={severityOptions}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.hazardLevel?.message}
-              />
-            )}
-          />
-
-          {/* 6. Deskripsi */}
-          <div className="flex flex-col gap-1.5 w-full">
-            <Textarea
-              label="Deskripsi Temuan"
-              placeholder="Jelaskan secara rinci apa yang terjadi, lokasi spesifik, dan kondisi saat ini..."
-              rows={5}
-              {...register("description")}
-              error={errors.description?.message}
-            />
-            {/* Penghitung Karakter */}
-            <div className="flex justify-between items-center px-1">
-              <span className="text-[11px] text-text-muted">
-                Jelaskan minimal 20 karakter agar kondisi mudah dipahami.
-              </span>
-              <span
-                className={`text-[11px] font-medium ${
-                  descriptionValue.length > 1000
-                    ? "text-severity-high"
-                    : "text-text-muted"
-                }`}
-              >
-                {descriptionValue.length}/1000
-              </span>
-            </div>
-          </div>
-
-          {/* 7. Foto Temuan */}
-          <Controller
-            name="files"
-            control={control}
-            render={({ field }) => (
-              <FileUpload
-                label="Foto Temuan (Wajib)"
-                accept="image/*"
-                multiple
-                maxSizeMB={5}
-                error={errors.files?.message}
-                onFilesChange={field.onChange}
-              />
-            )}
-          />
-
-          {/* Honeypot field untuk anti-spam (tersembunyi dari user) */}
-          <input
-            type="text"
-            id="botField"
-            name="botField"
-            className="hidden"
-            autoComplete="off"
-            tabIndex={-1}
-          />
-
-          {/* Submit Button */}
-          <div className="pt-5 border-t border-border mt-2 flex flex-col gap-3">
-            {submitError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {submitError}
-              </div>
-            )}
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Memproses Laporan..." : "Kirim Laporan"}
-            </Button>
-          </div>
-        </form>
-      </Card>
     </div>
   );
 }

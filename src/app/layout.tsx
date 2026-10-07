@@ -21,7 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Global Header */}
         <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               {/* Shield icon */}
               <svg
                 className="w-6 h-6 text-accent"
@@ -38,13 +38,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span className="font-semibold text-text text-sm sm:text-base leading-tight">
                 Laporan <span className="text-accent">Abnormality</span>
               </span>
-            </div>
+            </Link>
             <nav className="flex items-center gap-4 text-sm font-medium text-text-muted">
               <Link href="/cek-status" className="hover:text-accent transition-colors">
                 Cek Status
               </Link>
               <Link
-                href="/"
+                href="/lapor"
                 className="hover:text-accent transition-colors hidden sm:inline"
               >
                 Buat Laporan
@@ -58,8 +58,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         {/* Footer */}
         <footer className="border-t border-border bg-white mt-auto">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-text-muted">
-            © {new Date().getFullYear()} Sistem Laporan Abnormality Fasilitas Umum
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-text-muted">
+            <div>© {new Date().getFullYear()} Sistem Laporan Abnormality Fasilitas Umum</div>
+            <div className="flex items-center gap-4">
+              <span>Versi sementara</span>
+              <Link href="/admin/login" className="hover:text-accent transition-colors">
+                Login Admin
+              </Link>
+            </div>
           </div>
         </footer>
       </body>
