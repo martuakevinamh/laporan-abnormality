@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Brand */
+  --color-accent:        #1D4ED8;
+  --color-accent-hover:  #1E40AF;
+
+  /* Surfaces & Text */
+  --color-bg:            #F8FAFC;
+  --color-surface:       #FFFFFF;
+  --color-surface-muted: #F1F5F9;
+  --color-text:          #0F172A;
+  --color-text-muted:    #64748B;
+  --color-border:        #E2E8F0;
+
+  /* Status badges */
+  --color-status-reported-bg:       #DBEAFE;
+  --color-status-reported-text:     #1D4ED8;
+  --color-status-investigating-bg:  #FEF9C3;
+  --color-status-investigating-text:#92400E;
+  --color-status-resolved-bg:       #DCFCE7;
+  --color-status-resolved-text:     #15803D;
+  --color-status-rejected-bg:       #F1F5F9;
+  --color-status-rejected-text:     #475569;
+  --color-status-late-bg:           #FEE2E2;
+  --color-status-late-text:         #B91C1C;
+
+  /* Severity */
+  --color-severity-low:    #16A34A;
+  --color-severity-medium: #D97706;
+  --color-severity-high:   #DC2626;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #F8FAFC;
+  color: #0F172A;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
