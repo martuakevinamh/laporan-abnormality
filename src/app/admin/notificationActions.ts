@@ -8,7 +8,7 @@ export async function getNotifications() {
 
   const [{ data: settings }, { data: reports }] = await Promise.all([
     supabase.from("settings").select("*").single(),
-    supabase.from("reports").select("id, report_number, status, hazard_level, last_status_at, first_viewed_at, created_at, reporter_name").in("status", ["Reported", "Investigating"])
+    supabase.from("reports").select("id, report_number, status, hazard_level, last_status_at, first_viewed_at, created_at, reporter_name, area, departments(name)").in("status", ["Reported", "Investigating"])
   ]);
 
   if (!settings || !reports) return { overdue: [], unread: [] };

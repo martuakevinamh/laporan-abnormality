@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
 import { StatusBadge, SeverityBadge, LateBadge, type Status, type Severity } from "@/components/badges/Badges";
 import Link from "next/link";
+import { getNotifications } from "../notificationActions";
 
 export const metadata = {
   title: "Dashboard - Laporan Abnormality",
@@ -37,19 +38,9 @@ export default async function DashboardPage() {
     .eq("status", "Reported")
     .order("created_at", { ascending: true });
 
-  const overdueReports = (reportedTasks || []).filter((report) => {
-    const lastDate = report.last_status_at ? new Date(report.last_status_at) : new Date(report.created_at);
-    const diffTime = Math.abs(new Date().getTime() - lastDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    
-    let limit = 1;
-    if (settings) {
-      if (report.hazard_level === "Tinggi") limit = settings.alert_high_days;
-      else if (report.hazard_level === "Sedang") limit = settings.alert_medium_days;
-      else limit = settings.alert_low_days;
-    }
-    return diffDays > limit;
-  });
+  const { overdue } = await getNotifications();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overdueReports = overdue as any[];
 
   // 5 Laporan Terakhir Masuk
   const { data: recentReports } = await supabase
